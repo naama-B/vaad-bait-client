@@ -8,8 +8,8 @@ import { useNavigate } from "react-router";
 
 
 const schema=yup.object({
-    apartmentNumber:yup.number().integer("חייב להיות מספר").required("שדה חובה"),
-    floor:yup.number().integer("חייב להיות מספר").required("שדה חובה"),
+    apartmentNumber:yup.number().typeError("חייב להיות מספר").integer("חייב להיות מספר").required("שדה חובה"),
+    floor:yup.number().typeError("חייב להיות מספר").integer("חייב להיות מספר").required("שדה חובה"),
     residentName:yup.string().required("שדה חובה").min(2,"חייב להיות באורך של 2 תווים לפחות"),
     email: yup.string().required("שדה חובה").email("מייל לא תקין"),
     phone:yup.string().required("שדה חובה").matches(/^\+?[0-9-]{7,20}$/,"מספר טלפון לא תקין"),
@@ -27,9 +27,11 @@ const SingUp=()=>{
       });
     
       const [errorMsg, setErrorMsg] = useState('')
+      const [loading, setLoading] = useState(false)
 
       const  onSubmit=async(data:yup.InferType<typeof schema>)=>{
         console.log(data);
+        setLoading(true)
         try{        
             await SingUpMan(data) 
             navigate("/neighbors");
@@ -39,6 +41,9 @@ const SingUp=()=>{
             setErrorMsg("הנתונים שנשלחו אינם תקינים")
           if(err.response.status==409)
             setErrorMsg("מספר הדירה כבר קיים במערכת")}
+        }
+        finally{
+            setLoading(false)
         }
   
       }
@@ -57,12 +62,13 @@ const SingUp=()=>{
         {errors.email&&<p className="error-text">{errors.email.message}</p>}
         <input className="field" {...register("phone")} placeholder="הכנס טלפון בעלי הדירה" />
         {errors.phone&&<p className="error-text">{errors.phone.message}</p>}
-        <input className="field" {...register("initialPassword")} placeholder="הכנס סיסמה ראשונית" />
+        <input className="field" {...register("initialPassword")} placeholder="הכנס סיסמא ראשונית" />
         {errors.initialPassword&&<p className="error-text">{errors.initialPassword.message}</p>}
 
+        {loading && <p className="state-loading py-2">טוען...</p>}
         {errorMsg && <p className="state-error text-sm">{errorMsg}</p>}
 
-        <button className="btn btn-primary mt-3 h-12 w-full text-base" type="submit">הרשם</button>
+        <button className="btn btn-primary mt-3 h-12 w-full text-base" type="submit" disabled={loading}>הרשם</button>
       </form>
       </div>
 

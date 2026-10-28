@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { AuthContext } from "../contextUser";
 const schema=yup.object({
     email: yup.string().required("שדה חובה").email("מייל לא תקין"),
-    password : yup.string().required("שדה חובה").min(6,"הסיסמה צריכה להיות באורך של 6 תווים לפחות"),
+    password : yup.string().required("שדה חובה").min(8,"הסיסמה צריכה להיות באורך של 8 תווים לפחות"),
 }).required()
 const Login = () => {
   const { login } = useContext(AuthContext)
@@ -19,8 +19,10 @@ const Login = () => {
   });
 
   const [errorMsg, setErrorMsg] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const onSubmit=async(data:yup.InferType<typeof schema>)=>{
+      setLoading(true)
       try{
       await login(data)
       navigate("/");
@@ -35,6 +37,9 @@ const Login = () => {
         else
             setErrorMsg('שגיאה לא צפויה')
    }
+    finally {
+      setLoading(false)
+    }
   }
   return <div className="grid min-h-screen bg-cream lg:grid-cols-[1fr_1.1fr]">
     <div className="flex items-center justify-center px-4 py-10">
@@ -47,14 +52,15 @@ const Login = () => {
       <p className="text-sm text-stone-500">התחברו כדי להמשיך</p>
     </div>
     <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
-      <input type="password" className="field" {...register("password")}placeholder="סיסמה"/>
+      <input type="password" className="field" {...register("password")}placeholder="סיסמא"/>
       {errors.password && <p className="error-text">{errors.password.message}</p>}
       <input className="field" {...register("email")}placeholder="מייל"/>
       {errors.email && <p className="error-text">{errors.email.message}</p>}
 
+      {loading && <p className="state-loading py-2">טוען...</p>}
       {errorMsg && <p className="state-error text-sm">{errorMsg}</p>}
 
-      <button className="btn btn-primary mt-3 h-12 w-full text-base" type="submit">התחבר</button>
+      <button className="btn btn-primary mt-3 h-12 w-full text-base" type="submit" disabled={loading}>התחבר</button>
     </form>
     <div className="mb-8 flex flex-col items-center text-center text-forest-800">
       <p className="text-sm text-stone-500">  עדיין לא רשום? פנה לועד הבית כדי להרשם</p>

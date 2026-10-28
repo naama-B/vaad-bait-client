@@ -6,6 +6,7 @@ import { SendNewFault, UpdateFault } from "../service/user";
 import type { ToSendFault } from "../model/interfaces";
 import { useNavigate, useParams } from "react-router";
 import { useFaults } from "../component/getfaultbyid";
+import axios from "axios";
 const schema = yup.object({
     title: yup.string().required("שדה חובה"),
     description: yup.string().required("שדה חובה"),
@@ -48,7 +49,7 @@ const FaultForm = () => {
     if (isEdit && isLoadingfault)
         return <p className="state-loading">טוען...</p>
     if (isEdit && errorfault)
-        return <p className="state-error">{errorfault.message}</p>
+        return <p className="state-error">{axios.isAxiosError(errorfault) ? errorfault.response?.data?.error?.message ?? errorfault.message : errorfault.message}</p>
 
     const onsubmit = async (data: ToSendFault) => {
         mutate(data)
@@ -92,7 +93,7 @@ const FaultForm = () => {
         <input className="field" {...register("locationDetails")} placeholder="מיקום התקלה" />
         {errors.locationDetails && <p className="error-text">{errors.locationDetails.message}</p>}
         {isPending && <p className="state-loading py-2">טוען...</p>}
-        {error && <p className="state-error text-sm">{error.message}</p>}
+        {error && <p className="state-error text-sm">{axios.isAxiosError(error) ? error.response?.data?.error?.message ?? error.message : error.message}</p>}
 
 
         <button className="btn btn-primary mt-3 h-12 w-full text-base" type="submit" disabled={isPending}>שלח</button>
